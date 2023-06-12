@@ -1,0 +1,112 @@
+First I login mster node.
+after that import values.yaml file from github repository using below command 
+git clone https://github.com/ashishrpandey/example-voting-app
+after that reches out the yaml directory 
+=========================================================================
+
+login as: ec2-user
+Authenticating with public key "imported-openssh-key"
+Last login: Tue Jun  6 04:28:53 2023 from 152.58.92.108
+
+       __|  __|_  )
+       _|  (     /   Amazon Linux 2 AMI
+      ___|\___|___|
+
+https://aws.amazon.com/amazon-linux-2/
+20 package(s) needed for security, out of 29 available
+Run "sudo yum update" to apply all updates.
+[ec2-user@ip-172-31-10-221 ~]$ sudo  su
+[root@ip-172-31-10-221 ec2-user]# cd /root
+[root@ip-172-31-10-221 ~]# git clone https://github.com/ashishrpandey/example-voting-app
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 494, done.
+remote: Total 494 (delta 0), reused 0 (delta 0), pack-reused 494
+Receiving objects: 100% (494/494), 236.18 KiB | 12.43 MiB/s, done.
+Resolving deltas: 100% (179/179), done.
+[root@ip-172-31-10-221 ~]# cd /root/example-voting-app/k8s-specifications
+[root@ip-172-31-10-221 k8s-specifications]# ll
+total 36
+-rw-r--r-- 1 root root 401 Jun 11 18:03 db-deployment.yaml
+-rw-r--r-- 1 root root 146 Jun 11 18:03 db-service.yaml
+-rw-r--r-- 1 root root 402 Jun 11 18:03 redis-deployment.yaml
+-rw-r--r-- 1 root root 152 Jun 11 18:03 redis-service.yaml
+-rw-r--r-- 1 root root 299 Jun 11 18:03 result-deployment.yaml
+-rw-r--r-- 1 root root 195 Jun 11 18:03 result-service.yaml
+-rw-r--r-- 1 root root 289 Jun 11 18:03 vote-deployment.yaml
+-rw-r--r-- 1 root root 192 Jun 11 18:03 vote-service.yaml
+-rw-r--r-- 1 root root 292 Jun 11 18:03 worker-deployment.yaml
+
+===========================================================================
+
+after that run below cmd to install the application in same directory 
+kubectl apply -f .
+
+then all pod's are deployed 
+======================================================================
+[root@ip-172-31-10-221 k8s-specifications]# kubectl apply -f .
+deployment.apps/db created
+service/db created
+deployment.apps/redis created
+service/redis created
+deployment.apps/result created
+service/result created
+deployment.apps/vote created
+service/vote created
+deployment.apps/worker created
+
+[root@ip-172-31-10-221 k8s-specifications]# kubectl get services
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+db           ClusterIP   10.106.127.248   <none>        5432/TCP         2m6s
+kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP          6d13h
+redis        ClusterIP   10.100.216.149   <none>        6379/TCP         2m6s
+result       NodePort    10.110.147.203   <none>        5001:31001/TCP   2m6s
+vote         NodePort    10.110.177.209   <none>        5000:31000/TCP   2m6s
+
+=========================================================================
+
+we treid to run application in browser but not able to open the link
+but in cli we can saw output
+
+[root@ip-172-31-10-221 k8s-specifications]# curl 10.110.147.203:5001/result
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /result</pre>
+</body>
+</html>
+========================================================================
+
+After restarting vote,worker and db pod status
+
+after db restart llok like worker and result pod was crashed and rested the pod services
+
+
+[root@ip-172-31-10-221 ~]# kubectl delete po vote-94849dc97-sbnvt
+pod "vote-94849dc97-sbnvt" deleted
+[root@ip-172-31-10-221 ~]# kubectl delete po worker-dd46d7584-s7l4m
+pod "worker-dd46d7584-s7l4m" deleted
+[root@ip-172-31-10-221 ~]# kubectl delete po db-b54cd94f4-btsjx
+pod "db-b54cd94f4-btsjx" deleted
+[root@ip-172-31-10-221 ~]# kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+az-ngix                   1/1     Running   0          7d9h
+db-b54cd94f4-hzvx9        1/1     Running   0          42s
+kubia-manual              1/1     Running   0          6d12h
+redis-868d64d78-cphzr     1/1     Running   0          23h
+result-5d57b59f4b-6hh57   1/1     Running   1          23h
+vote-94849dc97-4n2sq      1/1     Running   0          87s
+worker-dd46d7584-pcrjq    1/1     Running   1          63s
+
+
+
+
+
+
+
+
+
+ 
